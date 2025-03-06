@@ -20,7 +20,7 @@ public class RestClient {
 
     Logger log = LoggerFactory.getLogger(RestClient.class);
 
-    public User getUser(User user){
+    public void getUser(User user){
         log.info("Starting BLOCKING Controller!");
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
@@ -28,8 +28,9 @@ public class RestClient {
         ResponseEntity<User> response = restTemplate.exchange(
                 "http://localhost:8088/sendEmail", HttpMethod.POST, requestEntity,
                 User.class);
+        log.info(response.getBody().toString());
         log.info("Ending BLOCKING Controller!");
-        return response.getBody();
+
 
     }
 }

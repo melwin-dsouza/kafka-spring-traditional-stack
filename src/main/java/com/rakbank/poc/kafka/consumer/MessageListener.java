@@ -14,12 +14,16 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Service
 public class MessageListener {
 
     Logger log = LoggerFactory.getLogger(MessageListener.class);
 
     private final RestClient restClient;
+    private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor(); // Virtual Threads
 
     @Autowired
     public MessageListener(RestClient restClient) {
@@ -31,7 +35,15 @@ public class MessageListener {
     public void consumeEvents(User user) {
         try {
             log.info("consumer consume the events {} ", user.toString());
-            restClient.getUser(user);
+            executorService.submit(()-> {
+                try {
+                    restClient.getUser(user);
+                } catch (Exception e) {
+                    System.err.println("Error processing message: " + e.getMessage());
+                    e.printStackTrace(); // Optional: Log stack trace for debugging
+                }
+            }
+            );
         } catch (Exception e) {
             System.err.println("⚠️ Error processing Kafka message: " + e.getMessage());
         }
