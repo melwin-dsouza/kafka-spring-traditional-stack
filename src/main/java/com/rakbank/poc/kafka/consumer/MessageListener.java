@@ -20,11 +20,11 @@ public class MessageListener {
 
     Logger log = LoggerFactory.getLogger(MessageListener.class);
 
-    private final RestClient restClient;
+    private final CcmClient ccmClient;
 
     @Autowired
-    public MessageListener(RestClient restClient) {
-        this.restClient = restClient;
+    public MessageListener(CcmClient ccmClient){
+        this.ccmClient = ccmClient;
     }
 
 
@@ -32,7 +32,7 @@ public class MessageListener {
     public void consumeEvents(User user) {
         try {
             log.info("consumer consume the events {} ", user.toString());
-            restClient.getUser(user);
+            ccmClient.callCCM(user);
         } catch (Exception e) {
             System.err.println("⚠️ Error processing Kafka message: " + e.getMessage());
         }
