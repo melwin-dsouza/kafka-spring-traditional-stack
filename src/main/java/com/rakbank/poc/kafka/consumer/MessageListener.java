@@ -1,6 +1,5 @@
 package com.rakbank.poc.kafka.consumer;
 
-import com.rakbank.poc.kafka.config.CcmClient;
 import com.rakbank.poc.kafka.config.RestClient;
 import com.rakbank.poc.kafka.config.RestTemplateConfig;
 import com.rakbank.poc.kafka.data.User;
