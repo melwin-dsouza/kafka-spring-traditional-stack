@@ -40,7 +40,7 @@ public class MessageListener {
                     restClient.getUser(user);
                 } catch (Exception e) {
                     System.err.println("Error processing message: " + e.getMessage());
-                    e.printStackTrace(); // Optional: Log stack trace for debugging
+//                    e.printStackTrace(); // Optional: Log stack trace for debugging
                 }
             }
             );

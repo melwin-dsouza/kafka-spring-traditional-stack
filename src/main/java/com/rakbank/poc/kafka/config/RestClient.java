@@ -28,7 +28,7 @@ public class RestClient {
         ResponseEntity<User> response = restTemplate.exchange(
                 "http://localhost:8088/sendEmail", HttpMethod.POST, requestEntity,
                 User.class);
-        log.info(response.getBody().toString());
+        log.info("Response- {}",response.getBody().toString());
         log.info("Ending BLOCKING Controller!");
 
 
