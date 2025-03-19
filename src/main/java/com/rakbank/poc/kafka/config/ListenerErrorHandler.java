@@ -1,39 +1,56 @@
 package com.rakbank.poc.kafka.config;
 
 import com.rakbank.poc.kafka.data.User;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
-import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.listener.KafkaListenerErrorHandler;
+import org.springframework.kafka.listener.*;
+import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
 import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.kafka.support.converter.ConversionException;
+import org.springframework.kafka.support.serializer.DeserializationException;
+import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.util.backoff.ExponentialBackOff;
 import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration
+@Slf4j
 public class ListenerErrorHandler {
 
     @Bean
-    public DefaultErrorHandler errorHandler(KafkaTemplate<String, User> kafkaTemplate) {
-//        DeadLetterPublishingRecoverer recoverer =
-//                new DeadLetterPublishingRecoverer(kafkaTemplate);
+    public DefaultErrorHandler errorHandler() {
+        // Exponential Backoff: initial delay 2s, multiplier 2x, max delay 30s, max retries 5
+        ExponentialBackOff backOff = new ExponentialBackOff();
+        backOff.setInitialInterval(2000L); // Start with 2 seconds delay
+        backOff.setMultiplier(2.0); // Double the delay each time
+        backOff.setMaxInterval(30000L); // Max retry delay: 30 seconds
+        backOff.setMaxAttempts(3); // Retry 3 times before giving up
 
-        return new DefaultErrorHandler(new FixedBackOff(5000L, 3));
-//        return new DefaultErrorHandler(recoverer, new ExponentialBackOff(2000L, 5));
+        // Logging only (No Dead Letter Queue)
+        ConsumerRecordRecoverer recoverer = (record, ex) -> {
+            log.error("🔥 Message permanently failed after retries: Key={}, Value={}, Partition={}, Offset={}",
+                    record.key(), record.value(), record.partition(), record.offset());
+        };
 
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer,backOff);
+
+        // ✅ Add retriable exception types
+        errorHandler.addRetryableExceptions(
+                RuntimeException.class, // Your application errors
+                ListenerExecutionFailedException.class // Kafka listener failures
+        );
+
+        // ❌ Do NOT retry for deserialization errors
+        errorHandler.addNotRetryableExceptions(
+                DeserializationException.class,
+                MessageConversionException.class,
+                ConversionException.class
+        );
+
+        return errorHandler;
     }
 
-//    @Bean
-//    public KafkaListenerErrorHandler eh(DeadLetterPublishingRecoverer recoverer) {
-//        return (msg, ex) -> {
-//            if (msg.getHeaders().get(KafkaHeaders.DELIVERY_ATTEMPT, Integer.class) > 3) {
-//                recoverer.accept(msg.getHeaders().get(KafkaHeaders.RAW_DATA, ConsumerRecord.class), ex);
-//                return "FAILED";
-//            }
-//            throw ex;
-//        };
-//    }
 
 }
