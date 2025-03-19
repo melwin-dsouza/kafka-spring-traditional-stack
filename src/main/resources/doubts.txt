@@ -1,0 +1,29 @@
+received message -> possible errors -> deserialization
+
+Validate message -> failure -> ?? options - skip the message and audit it
+					  - notify the team, skip message , audit it
+
+Sending advise to CCM -> ccm down, slow -> retry (3) after 10 seconds -> If retry fails -> ??
+
+			->ccm sending failure message -> retry (3) after 10 seconds -> If retry fails -> ??
+
+Any internal Error (DB-auditing) -> retry 3 times , after 10 seconds -> if retry fails -> ??
+
+
+------------------------
+ways to handle it
+
+log the message
+audit the message
+notify the team
+retry with exponential backoff
+dead letter queue
+
+how to retry manually??
+
+
+-------------
+
+error in ccm - after 3 retries move it to a error-queue
+
+deserialization and validation - ??

@@ -20,8 +20,8 @@ public class RestTemplateConfig {
 
     private ClientHttpRequestFactory clientHttpRequestFactory() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(0);  // Set connection timeout (50 seconds)
-        factory.setReadTimeout(0);     // Set read timeout (50 seconds)
+        factory.setConnectTimeout(60000);  // Set connection timeout (50 seconds)
+        factory.setReadTimeout(60000);     // Set read timeout (50 seconds)
         return factory;
     }
 }

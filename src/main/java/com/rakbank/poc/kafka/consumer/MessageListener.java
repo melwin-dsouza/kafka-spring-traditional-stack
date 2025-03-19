@@ -23,7 +23,7 @@ public class MessageListener {
     Logger log = LoggerFactory.getLogger(MessageListener.class);
 
     private final RestClient restClient;
-    private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor(); // Virtual Threads
+//    private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor(); // Virtual Threads
 
     @Autowired
     public MessageListener(RestClient restClient) {
@@ -31,21 +31,15 @@ public class MessageListener {
     }
 
 
-    @KafkaListener(topics = "kafka-mvd",groupId = "test-group",concurrency = "4")
+    @KafkaListener(topics = "kafka-mvd",groupId = "test-group",concurrency = "3")
     public void consumeEvents(User user) {
         try {
             log.info("consumer consume the events {} ", user.toString());
-            executorService.submit(()-> {
-                try {
-                    restClient.getUser(user);
-                } catch (Exception e) {
-                    System.err.println("Error processing message: " + e.getMessage());
-//                    e.printStackTrace(); // Optional: Log stack trace for debugging
-                }
-            }
-            );
+            restClient.getUser(user);
+
         } catch (Exception e) {
             System.err.println("⚠️ Error processing Kafka message: " + e.getMessage());
+            throw e;
         }
 
     }
